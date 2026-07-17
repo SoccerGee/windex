@@ -1,0 +1,8 @@
+# Rust build output
+/target
+
+# macOS
+.DS_Store
+
+# Local config / logs
+*.log

@@ -1,0 +1,66 @@
+[package]
+name = "windex"
+version = "0.1.0"
+edition = "2021"
+description = "A macOS window manager with grid-based snapping and smooth animations"
+authors = ["Grant Tuttle"]
+license = "MIT"
+
+[dependencies]
+# macOS Accessibility API for window manipulation
+accessibility-sys = "0.1"
+
+# Channel for events
+crossbeam-channel = "0.5"
+
+# Display/monitor enumeration
+core-graphics = "0.24"
+core-foundation = "0.10"
+
+# Global hotkey registration
+global-hotkey = "0.6"
+
+# Alternative keyboard listener
+rdev = "0.5"
+
+# Menu bar tray icon
+tray-icon = "0.19"
+
+# Objective-C bindings for NSApplication
+objc2 = "0.5"
+objc2-app-kit = { version = "0.2", features = ["NSApplication", "NSRunningApplication", "NSWorkspace", "NSEvent", "NSResponder"] }
+objc2-foundation = { version = "0.2", features = ["NSString", "NSArray", "NSDictionary", "NSDate", "NSRunLoop"] }
+
+# Configuration
+serde = { version = "1.0", features = ["derive"] }
+toml = "0.8"
+dirs = "5.0"
+
+# Animation easing
+keyframe = "1.1"
+
+# Accessibility permission checking
+macos-accessibility-client = "0.0.1"
+
+# Error handling
+anyhow = "1.0"
+thiserror = "2.0"
+
+# Logging
+log = "0.4"
+env_logger = "0.11"
+
+[dev-dependencies]
+pretty_assertions = "1.4"
+
+[[bin]]
+name = "test_hotkey"
+path = "src/bin/test_hotkey.rs"
+
+[[bin]]
+name = "test_rdev"
+path = "src/bin/test_rdev.rs"
+
+[profile.release]
+opt-level = 3
+lto = true
