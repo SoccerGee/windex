@@ -29,7 +29,9 @@ tray-icon = "0.19"
 # Objective-C bindings for NSApplication
 objc2 = "0.5"
 objc2-app-kit = { version = "0.2", features = ["NSApplication", "NSRunningApplication", "NSWorkspace", "NSEvent", "NSResponder"] }
-objc2-foundation = { version = "0.2", features = ["NSString", "NSArray", "NSDictionary", "NSDate", "NSRunLoop"] }
+# NSThread carries MainThreadMarker::new. It currently arrives via tray-icon's
+# own dependency, but relying on another crate's feature selection is fragile.
+objc2-foundation = { version = "0.2", features = ["NSString", "NSArray", "NSDictionary", "NSDate", "NSRunLoop", "NSThread"] }
 
 # Configuration
 serde = { version = "1.0", features = ["derive"] }
