@@ -18,9 +18,20 @@ Or download `Windex-<version>.dmg` from
 Applications.
 
 **`--no-quarantine` matters.** Windex isn't notarized (that needs a paid Apple
-Developer account), so without it macOS refuses to open the app. If you
-installed from the DMG instead, right-click Windex in Applications → **Open** →
-**Open**, which does the same thing once.
+Developer account), so without that flag macOS refuses to open it — and on
+macOS 15 and later, the old right-click → Open trick no longer works.
+
+If you installed from the DMG, you'll see *"Apple could not verify Windex is
+free of malware."* Click **Done** (not Move to Trash), then:
+
+**System Settings → Privacy & Security →** scroll to **Security → Open Anyway**,
+authenticate, and confirm. You only do this once.
+
+Prefer to skip the dance? Strip the quarantine flag yourself:
+
+```sh
+xattr -dr com.apple.quarantine /Applications/Windex.app
+```
 
 ### First launch
 

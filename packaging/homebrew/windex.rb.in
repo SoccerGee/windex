@@ -23,9 +23,14 @@ cask "windex" do
   ]
 
   caveats <<~EOS
-    Windex is not notarized, so install it with:
+    Windex is not notarized, so it must be installed with:
 
       brew install --cask --no-quarantine soccergee/tap/windex
+
+    If you installed without --no-quarantine, macOS will refuse to open it.
+    Clear the flag with:
+
+      xattr -dr com.apple.quarantine "#{appdir}/Windex.app"
 
     On first launch, grant Accessibility access in
     System Settings → Privacy & Security → Accessibility.
