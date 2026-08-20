@@ -51,8 +51,15 @@ else
     --description "Homebrew tap for Grant's apps" --clone=false
   git init -q "$WORK/tap"
   git -C "$WORK/tap" remote add origin "https://github.com/$OWNER/$TAP_REPO.git"
-  printf '# homebrew-tap\n\n    brew install --cask soccergee/tap/windex\n' \
-    > "$WORK/tap/README.md"
+  cat > "$WORK/tap/README.md" <<'TAPREADME'
+# homebrew-tap
+
+    brew install --cask soccergee/tap/windex
+    xattr -dr com.apple.quarantine /Applications/Windex.app
+
+Windex is not notarized and Homebrew quarantines every cask, so the second
+line is what lets macOS open it. See https://github.com/SoccerGee/windex
+TAPREADME
 fi
 
 mkdir -p "$WORK/tap/Casks"

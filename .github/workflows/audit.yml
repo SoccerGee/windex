@@ -1,0 +1,33 @@
+name: Audit
+
+# Windex runs with Accessibility access and sees every keystroke, so a
+# vulnerable dependency matters more here than in a typical CLI. Check the
+# lockfile against the RustSec advisory database on every change, and weekly
+# so newly published advisories surface without a push.
+on:
+  push:
+    branches: [main]
+    paths: ["Cargo.toml", "Cargo.lock", ".github/workflows/audit.yml"]
+  pull_request:
+    paths: ["Cargo.toml", "Cargo.lock"]
+  schedule:
+    - cron: "17 9 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+
+      - name: Install cargo-audit
+        run: cargo install cargo-audit --locked
+
+      # Fails on vulnerabilities. Unmaintained/unsound warnings are printed
+      # for review but not fatal: all nine today are GTK crates that
+      # tray-icon pulls in for Linux and that never build on macOS.
+      - name: Audit dependencies
+        run: cargo audit
