@@ -30,7 +30,12 @@ awk -v v="$VERSION" '!done && /^version = /{sub(/"[^"]*"/, "\"" v "\""); done=1}
 cargo update --workspace --offline >/dev/null 2>&1 || cargo update --workspace >/dev/null
 
 git add Cargo.toml Cargo.lock
-git commit -m "Release $VERSION"
+if git diff --cached --quiet; then
+  # Cargo.toml already carried this version — tag the commit as it stands.
+  info "Version is already $VERSION; tagging the current commit"
+else
+  git commit -m "Release $VERSION"
+fi
 git tag -a "v$VERSION" -m "Windex $VERSION"
 
 info "Pushing tag v$VERSION"
