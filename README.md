@@ -10,28 +10,26 @@ place instead of jumping.
 ## Install
 
 ```sh
-brew install --cask --no-quarantine soccergee/tap/windex
+brew install --cask soccergee/tap/windex
+xattr -dr com.apple.quarantine /Applications/Windex.app
 ```
 
 Or download `Windex-<version>.dmg` from
 [Releases](https://github.com/SoccerGee/windex/releases) and drag Windex to
 Applications.
 
-**`--no-quarantine` matters.** Windex isn't notarized (that needs a paid Apple
-Developer account), so without that flag macOS refuses to open it — and on
-macOS 15 and later, the old right-click → Open trick no longer works.
+**That second line matters.** Windex isn't notarized (that needs a paid Apple
+Developer account), and macOS quarantines anything you download — Homebrew
+included, since it no longer offers a `--no-quarantine` option. Without
+clearing the flag you'll get *"Apple could not verify Windex is free of
+malware."*
 
-If you installed from the DMG, you'll see *"Apple could not verify Windex is
-free of malware."* Click **Done** (not Move to Trash), then:
+If you hit that dialog, click **Done** (not Move to Trash), then either run the
+`xattr` command above, or go to **System Settings → Privacy & Security →**
+scroll to **Security → Open Anyway**, authenticate, and confirm. Either way it's
+a one-time step.
 
-**System Settings → Privacy & Security →** scroll to **Security → Open Anyway**,
-authenticate, and confirm. You only do this once.
-
-Prefer to skip the dance? Strip the quarantine flag yourself:
-
-```sh
-xattr -dr com.apple.quarantine /Applications/Windex.app
-```
+On macOS 15 and later the old right-click → **Open** trick no longer works.
 
 ### First launch
 

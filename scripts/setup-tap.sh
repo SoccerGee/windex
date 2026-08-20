@@ -51,7 +51,7 @@ else
     --description "Homebrew tap for Grant's apps" --clone=false
   git init -q "$WORK/tap"
   git -C "$WORK/tap" remote add origin "https://github.com/$OWNER/$TAP_REPO.git"
-  printf '# homebrew-tap\n\n    brew install --cask --no-quarantine soccergee/tap/windex\n' \
+  printf '# homebrew-tap\n\n    brew install --cask soccergee/tap/windex\n' \
     > "$WORK/tap/README.md"
 fi
 
@@ -69,7 +69,7 @@ cat <<MSG
 
 Tap published. Friends install with:
 
-  brew install --cask --no-quarantine soccergee/tap/windex
+  brew install --cask soccergee/tap/windex
 
 To let releases update the cask automatically, add a repo secret named
 HOMEBREW_TAP_TOKEN to SoccerGee/windex — a fine-grained PAT with

@@ -47,5 +47,5 @@ Release started. Watch it here:
   https://github.com/SoccerGee/windex/actions
 
 When it finishes, friends can install with:
-  brew install --cask --no-quarantine soccergee/tap/windex
+  brew install --cask soccergee/tap/windex
 MSG

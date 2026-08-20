@@ -9,7 +9,7 @@ cask "windex" do
   desc "Window manager with grid-based snapping and smooth animations"
   homepage "https://github.com/SoccerGee/windex"
 
-  depends_on macos: ">= :big_sur"
+  depends_on macos: :big_sur
 
   app "Windex.app"
 
@@ -23,16 +23,14 @@ cask "windex" do
   ]
 
   caveats <<~EOS
-    Windex is not notarized, so it must be installed with:
-
-      brew install --cask --no-quarantine soccergee/tap/windex
-
-    If you installed without --no-quarantine, macOS will refuse to open it.
-    Clear the flag with:
+    Windex is not notarized, and Homebrew quarantines every cask, so macOS
+    will refuse to open it until you clear the flag:
 
       xattr -dr com.apple.quarantine "#{appdir}/Windex.app"
 
-    On first launch, grant Accessibility access in
+    Or open it once via System Settings → Privacy & Security → Open Anyway.
+
+    Then grant Accessibility access in
     System Settings → Privacy & Security → Accessibility.
   EOS
 end
