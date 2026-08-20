@@ -40,28 +40,36 @@ impl DisplayManager {
     }
 
     /// Get the next monitor (wraps around)
+    ///
+    /// Returns `None` when no displays are active — enumeration can legitimately
+    /// come back empty, and the wrap-around arithmetic would otherwise panic.
     pub fn next_monitor(&self, current_id: u32) -> Option<&Monitor> {
+        let len = self.monitors.len();
+        if len == 0 {
+            return None;
+        }
         let idx = self
             .monitors
             .iter()
             .position(|m| m.id == current_id)
             .unwrap_or(0);
-        let next_idx = (idx + 1) % self.monitors.len();
-        self.monitors.get(next_idx)
+        self.monitors.get((idx + 1) % len)
     }
 
     /// Get the previous monitor (wraps around)
+    ///
+    /// Returns `None` when no displays are active. See `next_monitor`.
     pub fn previous_monitor(&self, current_id: u32) -> Option<&Monitor> {
+        let len = self.monitors.len();
+        if len == 0 {
+            return None;
+        }
         let idx = self
             .monitors
             .iter()
             .position(|m| m.id == current_id)
             .unwrap_or(0);
-        let prev_idx = if idx == 0 {
-            self.monitors.len() - 1
-        } else {
-            idx - 1
-        };
+        let prev_idx = if idx == 0 { len - 1 } else { idx - 1 };
         self.monitors.get(prev_idx)
     }
 }
@@ -69,5 +77,22 @@ impl DisplayManager {
 impl Default for DisplayManager {
     fn default() -> Self {
         Self::new()
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    /// Both of these panicked before the length guards: a divide-by-zero in
+    /// `next_monitor` and a subtract-overflow in `previous_monitor`.
+    #[test]
+    fn wrap_around_handles_no_displays() {
+        let manager = DisplayManager {
+            monitors: Vec::new(),
+        };
+        assert!(manager.next_monitor(0).is_none());
+        assert!(manager.previous_monitor(0).is_none());
+        assert!(manager.primary().is_none());
     }
 }

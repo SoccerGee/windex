@@ -37,7 +37,7 @@ pub fn run(config: Config) -> Result<()> {
     let hotkey_rx = HotkeyManager::start_listener(&config.hotkeys)?;
 
     // Build tray icon
-    let _tray = menu::build_tray()?;
+    let tray = menu::build_tray(crate::startup::is_enabled())?;
     info!("Tray icon created");
 
     // Get menu event receiver
@@ -82,8 +82,19 @@ pub fn run(config: Config) -> Result<()> {
                     info!("Settings requested");
                     open_config_file();
                 }
+                MenuAction::LaunchAtLogin => {
+                    // The checkbox has already flipped itself; apply the new
+                    // state, and put it back if registration failed.
+                    let desired = tray.launch_at_login_checked();
+                    info!("Launch at login toggled to {}", desired);
+                    if let Err(e) = crate::startup::set_enabled(desired) {
+                        error!("Could not change launch-at-login: {}", e);
+                        tray.set_launch_at_login(!desired);
+                    }
+                }
                 MenuAction::About => {
-                    info!("About requested");
+                    info!("Shortcuts requested");
+                    menu::shortcuts::show(&config.hotkeys);
                 }
                 MenuAction::Quit => {
                     info!("Quit requested");

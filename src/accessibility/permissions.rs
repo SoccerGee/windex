@@ -1,7 +1,8 @@
-use anyhow::{anyhow, Result};
+use anyhow::Result;
 use log::{info, warn};
+use std::path::PathBuf;
 use std::thread;
-use std::time::{Duration, Instant};
+use std::time::Duration;
 
 /// Check if the application has accessibility permission
 pub fn check_accessibility_permission() -> bool {
@@ -14,32 +15,58 @@ pub fn check_accessibility_permission() -> bool {
     trusted
 }
 
-/// Request accessibility permission from the user
-/// This will show a system dialog prompting the user to grant permission
+/// Ask for accessibility permission without blocking startup.
+///
+/// Shows the system prompt, then watches for the grant in the background. The
+/// keyboard listener can only attach once permission exists, so Windex relaunches
+/// itself the moment the user flips the switch — otherwise they would have to
+/// quit and reopen it by hand.
 pub fn request_accessibility_permission() -> Result<()> {
-    info!("Requesting accessibility permission...");
-
-    // Trigger the system permission prompt
+    info!("Requesting accessibility permission…");
     macos_accessibility_client::accessibility::application_is_trusted_with_prompt();
 
-    // Poll for permission (user needs to go to System Settings)
-    let start = Instant::now();
-    let timeout = Duration::from_secs(120); // 2 minute timeout
-    let poll_interval = Duration::from_secs(1);
-
-    info!("Please grant accessibility permission in System Settings...");
-    info!("Waiting for permission (timeout: {:?})...", timeout);
-
-    while start.elapsed() < timeout {
-        if macos_accessibility_client::accessibility::application_is_trusted() {
-            info!("Accessibility permission granted!");
-            return Ok(());
+    thread::spawn(|| {
+        loop {
+            thread::sleep(Duration::from_secs(2));
+            if macos_accessibility_client::accessibility::application_is_trusted() {
+                info!("Accessibility permission granted — relaunching");
+                relaunch();
+                return;
+            }
         }
-        thread::sleep(poll_interval);
+    });
+
+    Ok(())
+}
+
+/// Restart the process so it picks up the newly granted permission.
+fn relaunch() {
+    let spawned = match app_bundle_path() {
+        // `open -n` gives the new instance a fresh app context rather than
+        // reusing this process's (still unprivileged) session.
+        Some(bundle) => std::process::Command::new("open")
+            .arg("-n")
+            .arg(&bundle)
+            .spawn()
+            .is_ok(),
+        None => std::env::current_exe()
+            .ok()
+            .and_then(|exe| std::process::Command::new(exe).spawn().ok())
+            .is_some(),
+    };
+
+    if !spawned {
+        warn!("Could not relaunch automatically — please quit and reopen Windex");
+        return;
     }
 
-    Err(anyhow!(
-        "Accessibility permission not granted within timeout. \
-         Please grant permission in System Settings > Privacy & Security > Accessibility"
-    ))
+    std::process::exit(0);
+}
+
+/// The enclosing `.app` bundle, when running from one.
+fn app_bundle_path() -> Option<PathBuf> {
+    let exe = std::env::current_exe().ok()?;
+    // …/Windex.app/Contents/MacOS/windex
+    let bundle = exe.parent()?.parent()?.parent()?;
+    (bundle.extension()? == "app").then(|| bundle.to_path_buf())
 }

@@ -1,4 +1,5 @@
 use core_graphics::display::{CGDisplay, CGMainDisplayID};
+use log::warn;
 use core_graphics::geometry::{CGPoint, CGRect, CGSize};
 
 /// Represents a physical display/monitor
@@ -21,15 +22,21 @@ impl Monitor {
         let mut display_ids = vec![0u32; max_displays as usize];
         let mut display_count = 0u32;
 
-        unsafe {
+        let err = unsafe {
             core_graphics::display::CGGetActiveDisplayList(
                 max_displays,
                 display_ids.as_mut_ptr(),
                 &mut display_count,
-            );
+            )
+        };
+
+        if err != 0 {
+            warn!("CGGetActiveDisplayList failed (error {err}); no displays enumerated");
+            display_count = 0;
         }
 
-        display_ids.truncate(display_count as usize);
+        // Never trust the reported count past the buffer we handed over.
+        display_ids.truncate((display_count as usize).min(max_displays as usize));
         let main_display_id = unsafe { CGMainDisplayID() };
 
         display_ids

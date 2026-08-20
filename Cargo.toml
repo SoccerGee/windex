@@ -42,8 +42,11 @@ keyframe = "1.1"
 # Accessibility permission checking
 macos-accessibility-client = "0.0.1"
 
+# getuid() for the per-user launchctl domain
+libc = "0.2"
+
 # Error handling
-anyhow = "1.0"
+anyhow = "1.0.103"
 thiserror = "2.0"
 
 # Logging

@@ -1,60 +1,43 @@
-# windex
+# Windex
 
 A macOS window manager with grid-based snapping and smooth animations, written in Rust.
 
-windex runs quietly in your menu bar and lets you snap the focused window to
-halves, thirds, and quarters of the screen — or shove it to the next monitor —
-with global keyboard shortcuts. Movements are animated with a short easing
-curve so windows glide into place instead of jumping.
-
-## Features
-
-- **Halves** — snap left / right / top / bottom
-- **Thirds** — left, center, right, plus left/right two-thirds
-- **Quarters** — snap to any corner
-- **Maximize** and **center** the focused window
-- **Multi-monitor** — move a window to the next or previous display
-- **Smooth animations** — configurable duration and easing
-- **TOML config** — remap every hotkey
-- **Menu bar tray icon** — lightweight, no dock icon
-- **Launch at login** — optional LaunchAgent installer
-
-## Requirements
-
-- macOS
-- [Rust toolchain](https://rustup.rs/) (to build from source)
-- Accessibility permission (macOS will prompt on first launch — windex needs it
-  to move and resize other apps' windows)
+Windex lives in your menu bar and snaps the focused window to halves, thirds, and
+quarters of the screen — or shoves it to the next monitor — with global keyboard
+shortcuts. Movements are animated with a short easing curve so windows glide into
+place instead of jumping.
 
 ## Install
 
 ```sh
-git clone https://github.com/SoccerGee/windex.git
-cd windex
-./install.sh
+brew install --cask --no-quarantine soccergee/tap/windex
 ```
 
-`install.sh` builds the release binary, installs it to `~/bin/windex`, and
-registers a LaunchAgent so windex starts automatically at login. On first run
-macOS will ask you to grant Accessibility permission — the installer opens the
-right settings pane and walks you through it.
+Or download `Windex-<version>.dmg` from
+[Releases](https://github.com/SoccerGee/windex/releases) and drag Windex to
+Applications.
 
-To remove it:
+**`--no-quarantine` matters.** Windex isn't notarized (that needs a paid Apple
+Developer account), so without it macOS refuses to open the app. If you
+installed from the DMG instead, right-click Windex in Applications → **Open** →
+**Open**, which does the same thing once.
 
-```sh
-./install.sh uninstall
-```
+### First launch
 
-Or just build and run manually:
+macOS will ask for **Accessibility** access — Windex needs it to move other
+apps' windows. Grant it in System Settings → Privacy & Security → Accessibility;
+Windex restarts itself as soon as you flip the switch.
 
-```sh
-cargo build --release
-./target/release/windex
-```
+Then click the menu bar icon and turn on **Launch at Login** if you want it
+starting with your Mac.
 
-## Default keybindings
+Requires macOS 11 or later. Runs natively on both Apple Silicon and Intel.
 
-All shortcuts use <kbd>Ctrl</kbd>+<kbd>Alt</kbd> (⌃⌥) as the modifier.
+## Default shortcuts
+
+All shortcuts use <kbd>⌃</kbd><kbd>⌥</kbd> (Ctrl+Alt) as the modifier. The menu
+bar item's **Keyboard Shortcuts…** entry shows your live bindings, including any
+you've remapped.
 
 | Action | Shortcut |
 | --- | --- |
@@ -78,8 +61,9 @@ All shortcuts use <kbd>Ctrl</kbd>+<kbd>Alt</kbd> (⌃⌥) as the modifier.
 
 ## Configuration
 
-windex reads a TOML config file on launch (created with defaults on first run).
-Every hotkey is remappable, and animation timing is adjustable:
+**Edit Config…** in the menu bar opens
+`~/Library/Application Support/windex/config.toml`, written with defaults on
+first run. Restart Windex to pick up changes.
 
 ```toml
 [general]
@@ -88,23 +72,67 @@ launch_at_login = false
 [hotkeys]
 snap_left_half = "ctrl+alt+left"
 snap_right_half = "ctrl+alt+right"
-# ... see all keys below
+# ...one key per action in the table above
 
 [animation]
 duration_ms = 100
 easing = "ease-out-cubic"
 ```
 
-Set any hotkey to remove it, or change the binding string to remap it. The full
-list of hotkey keys matches the actions in the table above.
+Remove a hotkey line to unbind that action. `launch_at_login` mirrors the menu
+bar toggle — either one manages the LaunchAgent at
+`~/Library/LaunchAgents/com.granttuttle.windex.plist`.
 
-## Building
+## Uninstall
 
 ```sh
-cargo build --release
+brew uninstall --cask windex && brew uninstall --zap --cask windex
 ```
 
-The release profile enables LTO and `opt-level = 3` for a small, fast binary.
+Or, for a manual install: `./install.sh uninstall`. Either way you may also want
+to delete the Windex entry under System Settings → Privacy & Security →
+Accessibility.
+
+## What Windex can see
+
+Windex needs two things that are worth understanding before you install it:
+
+- **Accessibility access**, so it can move and resize other apps' windows.
+- **A keyboard listener**, so global shortcuts work anywhere. It is registered
+  in listen-only mode — Windex can observe keystrokes but cannot alter or
+  swallow them — and it only ever acts on the combinations in your config.
+
+Windex makes no network connections of any kind, and nothing it reads leaves
+your Mac. Its log (`~/Library/Logs/windex.log`) records window geometry and
+which shortcut fired, never key contents. The source is here if you'd rather
+check than take my word for it.
+
+## Building from source
+
+Needs the [Rust toolchain](https://rustup.rs/).
+
+```sh
+make install      # build Windex.app and install it to /Applications
+make app          # just build dist/Windex.app (universal binary)
+make dmg          # package dist/Windex-<version>.dmg
+make run          # run in the foreground with debug logging
+```
+
+`scripts/build-app.sh --native` skips the Intel slice for faster iteration.
+Builds are ad-hoc signed by default; set `CODESIGN_IDENTITY` to a Developer ID
+to sign properly. Note that ad-hoc signatures change on every build, so macOS
+re-asks for Accessibility permission after each install from source.
+
+## Releasing
+
+```sh
+./scripts/release.sh 0.2.0
+```
+
+That bumps the version, tags, and pushes. GitHub Actions builds the universal
+app, attaches the DMG to the release, and — once `HOMEBREW_TAP_TOKEN` is set as
+a repo secret — updates the Homebrew cask. `scripts/setup-tap.sh` creates the
+tap the first time.
 
 ## License
 

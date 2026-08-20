@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>CFBundleName</key>
+    <string>Windex</string>
+    <key>CFBundleDisplayName</key>
+    <string>Windex</string>
+    <key>CFBundleExecutable</key>
+    <string>windex</string>
+    <key>CFBundleIdentifier</key>
+    <string>com.granttuttle.windex</string>
+    <key>CFBundlePackageType</key>
+    <string>APPL</string>
+    <key>CFBundleShortVersionString</key>
+    <string>@VERSION@</string>
+    <key>CFBundleVersion</key>
+    <string>@VERSION@</string>
+    <key>CFBundleIconFile</key>
+    <string>Windex</string>
+    <key>CFBundleInfoDictionaryVersion</key>
+    <string>6.0</string>
+    <key>LSMinimumSystemVersion</key>
+    <string>11.0</string>
+    <!-- Menu bar only: no Dock icon, no app switcher entry. -->
+    <key>LSUIElement</key>
+    <true/>
+    <key>NSHighResolutionCapable</key>
+    <true/>
+    <key>NSHumanReadableCopyright</key>
+    <string>© Grant Tuttle. MIT licensed.</string>
+    <!-- Shown in the Accessibility permission prompt. -->
+    <key>NSAccessibilityUsageDescription</key>
+    <string>Windex needs Accessibility access to move and resize the windows of other apps.</string>
+</dict>
+</plist>

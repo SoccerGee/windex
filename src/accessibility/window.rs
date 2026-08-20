@@ -1,8 +1,9 @@
 use accessibility_sys::{
-    AXUIElementCopyAttributeValue, AXUIElementCreateApplication, AXUIElementRef,
-    AXUIElementSetAttributeValue, AXValueCreate, AXValueGetValue, AXValueRef,
+    AXUIElementCopyAttributeValue, AXUIElementCreateApplication, AXUIElementGetTypeID,
+    AXUIElementRef, AXUIElementSetAttributeValue, AXValueCreate, AXValueGetTypeID, AXValueGetValue,
+    AXValueRef,
 };
-use core_foundation::base::{CFRelease, CFTypeRef, TCFType};
+use core_foundation::base::{CFGetTypeID, CFRelease, CFTypeRef, TCFType};
 use core_foundation::string::CFString;
 use core_graphics::geometry::{CGPoint, CGRect, CGSize};
 use std::ffi::c_void;
@@ -53,6 +54,14 @@ impl Window {
                 return Err(WindowError::NoFocusedWindow);
             }
 
+            // The value comes from another app's accessibility server, which is
+            // free to hand back any CFType. Casting it blind would be type
+            // confusion in a process holding Accessibility privileges.
+            if CFGetTypeID(window_ref) != AXUIElementGetTypeID() {
+                CFRelease(window_ref);
+                return Err(WindowError::NotManipulable);
+            }
+
             Ok(Window {
                 element: window_ref as AXUIElementRef,
             })
@@ -80,6 +89,15 @@ impl Window {
 
             if result != 0 || value_ref.is_null() {
                 return Err(WindowError::AttributeError("position".to_string()));
+            }
+
+            // Same caveat as `focused`: only an AXValue may be passed to
+            // AXValueGetValue, and the source app chooses what it returns.
+            if CFGetTypeID(value_ref) != AXValueGetTypeID() {
+                CFRelease(value_ref);
+                return Err(WindowError::AttributeError(
+                    "position attribute was not an AXValue".to_string(),
+                ));
             }
 
             let ax_value = value_ref as AXValueRef;
@@ -115,6 +133,15 @@ impl Window {
 
             if result != 0 || value_ref.is_null() {
                 return Err(WindowError::AttributeError("size".to_string()));
+            }
+
+            // Same caveat as `focused`: only an AXValue may be passed to
+            // AXValueGetValue, and the source app chooses what it returns.
+            if CFGetTypeID(value_ref) != AXValueGetTypeID() {
+                CFRelease(value_ref);
+                return Err(WindowError::AttributeError(
+                    "size attribute was not an AXValue".to_string(),
+                ));
             }
 
             let ax_value = value_ref as AXValueRef;

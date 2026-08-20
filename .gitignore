@@ -6,3 +6,6 @@
 
 # Local config / logs
 *.log
+
+# Packaging output
+/dist
