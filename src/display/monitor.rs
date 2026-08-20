@@ -58,11 +58,13 @@ impl Monitor {
             .collect()
     }
 
+    #[allow(dead_code)] // part of the type's API; not called yet
     /// Get the primary monitor
     pub fn primary() -> Option<Monitor> {
         Self::all().into_iter().find(|m| m.is_primary)
     }
 
+    #[allow(dead_code)] // part of the type's API; not called yet
     /// Find the monitor containing a given point
     pub fn containing_point(point: CGPoint) -> Option<Monitor> {
         Self::all().into_iter().find(|m| {

@@ -14,11 +14,13 @@ impl DisplayManager {
         }
     }
 
+    #[allow(dead_code)] // part of the type's API; not called yet
     /// Refresh the list of monitors (call when displays change)
     pub fn refresh(&mut self) {
         self.monitors = Monitor::all();
     }
 
+    #[allow(dead_code)] // part of the type's API; not called yet
     /// Get all monitors
     pub fn monitors(&self) -> &[Monitor] {
         &self.monitors

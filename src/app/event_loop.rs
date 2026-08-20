@@ -10,7 +10,6 @@ use core_graphics::geometry::CGRect;
 use log::{error, info, warn};
 use objc2_app_kit::{NSApplication, NSApplicationActivationPolicy, NSEventMask};
 use objc2_foundation::{MainThreadMarker, NSDate, NSDefaultRunLoopMode};
-use std::sync::mpsc::Receiver;
 
 /// Run the main application event loop
 pub fn run(config: Config) -> Result<()> {

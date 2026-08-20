@@ -4,14 +4,11 @@ use anyhow::Result;
 use log::{info, warn};
 use rdev::{Event, EventType, Key};
 use std::collections::HashMap;
-use std::sync::mpsc::{self, Receiver, Sender};
+use std::sync::mpsc::{self, Receiver};
 use std::thread;
 
 /// Manages keyboard listening and hotkey detection
-pub struct HotkeyManager {
-    bindings: HashMap<HotkeyCombo, LayoutAction>,
-    event_receiver: Receiver<LayoutAction>,
-}
+pub struct HotkeyManager;
 
 /// A combination of modifier keys and a main key
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -24,18 +21,6 @@ struct HotkeyCombo {
 }
 
 impl HotkeyManager {
-    /// Create a new hotkey manager and start listening
-    pub fn new() -> Result<(Self, Sender<LayoutAction>)> {
-        let (tx, rx) = mpsc::channel();
-        Ok((
-            Self {
-                bindings: HashMap::new(),
-                event_receiver: rx,
-            },
-            tx,
-        ))
-    }
-
     /// Register hotkeys from configuration and start the listener thread
     pub fn start_listener(config: &HotkeyConfig) -> Result<Receiver<LayoutAction>> {
         let (action_tx, action_rx) = mpsc::channel();

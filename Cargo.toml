@@ -56,14 +56,8 @@ env_logger = "0.11"
 [dev-dependencies]
 pretty_assertions = "1.4"
 
-[[bin]]
-name = "test_hotkey"
-path = "src/bin/test_hotkey.rs"
-
-[[bin]]
-name = "test_rdev"
-path = "src/bin/test_rdev.rs"
-
+# Debugging aids for the keyboard layer, kept out of the default build:
+#   cargo run --example probe_rdev
 [profile.release]
 opt-level = 3
 lto = true

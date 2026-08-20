@@ -33,6 +33,7 @@ pub enum LayoutAction {
 }
 
 impl LayoutAction {
+    #[allow(dead_code)] // part of the type's API; not called yet
     /// Returns all available layout actions
     pub fn all() -> &'static [LayoutAction] {
         use LayoutAction::*;
@@ -57,6 +58,7 @@ impl LayoutAction {
         ]
     }
 
+    #[allow(dead_code)] // part of the type's API; not called yet
     /// Get the config key name for this action
     pub fn config_key(&self) -> &'static str {
         match self {
