@@ -25,8 +25,16 @@ VERSION="${1:-$(awk -F'"' '/^version = /{print $2; exit}' "$REPO_DIR/Cargo.toml"
 DMG_URL="https://github.com/$OWNER/windex/releases/download/v$VERSION/Windex-$VERSION.dmg"
 
 info "Checking release v$VERSION"
-curl -fsSLI "$DMG_URL" >/dev/null 2>&1 \
-  || die "no published DMG at $DMG_URL — run ./scripts/release.sh $VERSION first"
+# Checked unauthenticated on purpose: this is exactly what Homebrew and your
+# friends will do, so a private repo has to fail here rather than at their end.
+if ! curl -fsSLI "$DMG_URL" >/dev/null 2>&1; then
+  if gh release view "v$VERSION" --repo "$OWNER/windex" >/dev/null 2>&1; then
+    die "release v$VERSION exists but $DMG_URL is not publicly readable.
+       $OWNER/windex is private, so Homebrew cannot download the DMG. Make it
+       public with:  gh repo edit $OWNER/windex --visibility public"
+  fi
+  die "no published DMG at $DMG_URL — run ./scripts/release.sh $VERSION first"
+fi
 
 info "Computing checksum"
 SHA="$(curl -fsSL "$DMG_URL" | shasum -a 256 | awk '{print $1}')"
