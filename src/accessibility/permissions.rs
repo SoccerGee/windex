@@ -26,6 +26,14 @@ pub fn request_accessibility_permission() -> Result<()> {
     macos_accessibility_client::accessibility::application_is_trusted_with_prompt();
 
     thread::spawn(|| {
+        // The system prompt only appears when TCC has no recorded decision for
+        // this app. If it didn't show — or the user dismissed it — open the
+        // Accessibility pane directly so they aren't left hunting for it.
+        thread::sleep(Duration::from_secs(3));
+        if !macos_accessibility_client::accessibility::application_is_trusted() {
+            open_accessibility_settings();
+        }
+
         loop {
             thread::sleep(Duration::from_secs(2));
             if macos_accessibility_client::accessibility::application_is_trusted() {
@@ -37,6 +45,14 @@ pub fn request_accessibility_permission() -> Result<()> {
     });
 
     Ok(())
+}
+
+/// Open System Settings directly at Privacy & Security → Accessibility.
+pub fn open_accessibility_settings() {
+    let pane = "x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility";
+    if let Err(e) = std::process::Command::new("open").arg(pane).spawn() {
+        warn!("Could not open the Accessibility settings pane: {}", e);
+    }
 }
 
 /// Restart the process so it picks up the newly granted permission.

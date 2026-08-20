@@ -82,6 +82,10 @@ pub fn run(config: Config) -> Result<()> {
                     info!("Settings requested");
                     open_config_file();
                 }
+                MenuAction::AccessibilitySettings => {
+                    info!("Accessibility settings requested");
+                    crate::accessibility::permissions::open_accessibility_settings();
+                }
                 MenuAction::LaunchAtLogin => {
                     // The checkbox has already flipped itself; apply the new
                     // state, and put it back if registration failed.

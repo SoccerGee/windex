@@ -90,6 +90,8 @@ duration_ms = 100
 easing = "ease-out-cubic"
 ```
 
+Defaults are only written on first run — an existing config.toml is never
+overwritten, so delete it if you want to pick up new defaults after an upgrade.
 Remove a hotkey line to unbind that action. `launch_at_login` mirrors the menu
 bar toggle — either one manages the LaunchAgent at
 `~/Library/LaunchAgents/com.granttuttle.windex.plist`.

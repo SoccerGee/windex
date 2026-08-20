@@ -7,6 +7,7 @@ use tray_icon::{Icon, TrayIcon, TrayIconBuilder};
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum MenuAction {
     Settings,
+    AccessibilitySettings,
     LaunchAtLogin,
     About,
     Quit,
@@ -16,6 +17,7 @@ pub enum MenuAction {
 /// Menu item IDs
 struct MenuIds {
     settings: MenuId,
+    accessibility: MenuId,
     launch_at_login: MenuId,
     about: MenuId,
     quit: MenuId,
@@ -55,6 +57,7 @@ pub fn build_tray(launch_at_login: bool) -> Result<Tray> {
         None,
     );
     let settings_item = MenuItem::new("Edit Config…", true, None);
+    let accessibility_item = MenuItem::new("Accessibility Access…", true, None);
     let launch_item = CheckMenuItem::new("Launch at Login", true, launch_at_login, None);
     let about_item = MenuItem::new("Keyboard Shortcuts…", true, None);
     let quit_item = MenuItem::new("Quit Windex", true, None);
@@ -62,6 +65,7 @@ pub fn build_tray(launch_at_login: bool) -> Result<Tray> {
     // Store the menu item IDs for later lookup
     let _ = MENU_IDS.set(MenuIds {
         settings: settings_item.id().clone(),
+        accessibility: accessibility_item.id().clone(),
         launch_at_login: launch_item.id().clone(),
         about: about_item.id().clone(),
         quit: quit_item.id().clone(),
@@ -71,6 +75,7 @@ pub fn build_tray(launch_at_login: bool) -> Result<Tray> {
     menu.append(&PredefinedMenuItem::separator())?;
     menu.append(&about_item)?;
     menu.append(&settings_item)?;
+    menu.append(&accessibility_item)?;
     menu.append(&launch_item)?;
     menu.append(&PredefinedMenuItem::separator())?;
     menu.append(&quit_item)?;
@@ -153,6 +158,8 @@ pub fn event_to_action(event: &MenuEvent) -> MenuAction {
 
     if event.id == ids.settings {
         MenuAction::Settings
+    } else if event.id == ids.accessibility {
+        MenuAction::AccessibilitySettings
     } else if event.id == ids.launch_at_login {
         MenuAction::LaunchAtLogin
     } else if event.id == ids.about {

@@ -249,3 +249,54 @@ fn parse_key(key: &str) -> Result<Key> {
         other => anyhow::bail!("Unknown key: {}", other),
     })
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::config::settings::HotkeyConfig;
+
+    /// Every shipped default must parse — an unparseable binding is only a
+    /// warning at runtime, so the shortcut would silently do nothing.
+    #[test]
+    fn every_default_binding_parses() {
+        let config = HotkeyConfig::default();
+        let defaults = [
+            &config.snap_left_half,
+            &config.snap_right_half,
+            &config.snap_top_half,
+            &config.snap_bottom_half,
+            &config.snap_left_third,
+            &config.snap_center_third,
+            &config.snap_right_third,
+            &config.snap_left_two_thirds,
+            &config.snap_right_two_thirds,
+            &config.snap_top_left,
+            &config.snap_top_right,
+            &config.snap_bottom_left,
+            &config.snap_bottom_right,
+            &config.maximize,
+            &config.center,
+            &config.move_to_next_monitor,
+            &config.move_to_previous_monitor,
+        ];
+
+        let mut seen = Vec::new();
+        for binding in defaults {
+            let binding = binding.as_ref().expect("default bindings are all set");
+            let combo = parse_hotkey_combo(binding)
+                .unwrap_or_else(|e| panic!("default binding {binding:?} does not parse: {e}"));
+            assert!(
+                !seen.contains(&combo),
+                "two defaults share the combo {binding:?}"
+            );
+            seen.push(combo);
+        }
+    }
+
+    #[test]
+    fn parses_a_full_modifier_stack() {
+        let combo = parse_hotkey_combo("ctrl+shift+cmd+right").unwrap();
+        assert!(combo.ctrl && combo.shift && combo.cmd && !combo.alt);
+        assert_eq!(combo.key, Key::RightArrow);
+    }
+}
