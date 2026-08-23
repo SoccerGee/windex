@@ -1,0 +1,34 @@
+# Temporary diagnostic: verify the HOMEBREW_TAP_TOKEN secret is non-empty
+# and can access the homebrew-tap repo. Safe to delete.
+name: Check tap token
+
+on: workflow_dispatch
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    env:
+      TOKEN: ${{ secrets.HOMEBREW_TAP_TOKEN }}
+    steps:
+      - name: Probe token
+        run: |
+          if [ -z "$TOKEN" ]; then
+            echo "RESULT: secret is EMPTY"
+            exit 1
+          fi
+          echo "RESULT: secret present (length ${#TOKEN})"
+
+          auth="$(printf 'x-access-token:%s' "$TOKEN" | openssl base64 -A)"
+          if git -c "http.https://github.com/.extraheader=Authorization: Basic $auth" \
+              ls-remote https://github.com/SoccerGee/homebrew-tap.git HEAD >/dev/null 2>&1; then
+            echo "RESULT: token can read SoccerGee/homebrew-tap"
+          else
+            echo "RESULT: token CANNOT read SoccerGee/homebrew-tap"
+            exit 1
+          fi
+
+          push=$(curl -s -H "Authorization: Bearer $TOKEN" \
+            https://api.github.com/repos/SoccerGee/homebrew-tap \
+            | python3 -c 'import json,sys; print(json.load(sys.stdin).get("permissions",{}).get("push"))')
+          echo "RESULT: push permission = $push"
+          [ "$push" = "True" ] || [ "$push" = "true" ] || exit 1
