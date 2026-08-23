@@ -27,7 +27,7 @@ pub fn run(config: Config) -> Result<()> {
     }
 
     // Create display manager
-    let display_manager = DisplayManager::new();
+    let mut display_manager = DisplayManager::new();
 
     // Create animator
     let mut animator = Animator::new(config.animation.duration_ms);
@@ -70,7 +70,7 @@ pub fn run(config: Config) -> Result<()> {
         // Process hotkey events from rdev listener thread
         while let Ok(action) = hotkey_rx.try_recv() {
             info!("Hotkey action received: {:?}", action);
-            execute_action(&display_manager, &mut animator, action);
+            execute_action(&mut display_manager, &mut animator, action);
         }
 
         // Process menu events
@@ -120,8 +120,16 @@ pub fn run(config: Config) -> Result<()> {
 }
 
 /// Execute a layout action
-fn execute_action(display_manager: &DisplayManager, animator: &mut Animator, action: LayoutAction) {
+fn execute_action(
+    display_manager: &mut DisplayManager,
+    animator: &mut Animator,
+    action: LayoutAction,
+) {
     info!("Executing action: {:?}", action);
+
+    // Displays can be plugged in, removed, or rearranged at any time; the OS
+    // gives us no push notification here, so re-enumerate before every action.
+    display_manager.refresh();
 
     // Get the focused window
     let window = match Window::focused() {
