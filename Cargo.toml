@@ -28,10 +28,13 @@ tray-icon = "0.19"
 
 # Objective-C bindings for NSApplication
 objc2 = "0.5"
-objc2-app-kit = { version = "0.2", features = ["NSApplication", "NSRunningApplication", "NSWorkspace", "NSEvent", "NSResponder"] }
+# NSScreen + NSGraphics power the per-display visibleFrame lookup
+objc2-app-kit = { version = "0.2", features = ["NSApplication", "NSRunningApplication", "NSWorkspace", "NSEvent", "NSResponder", "NSScreen", "NSGraphics"] }
 # NSThread carries MainThreadMarker::new. It currently arrives via tray-icon's
 # own dependency, but relying on another crate's feature selection is fragile.
-objc2-foundation = { version = "0.2", features = ["NSString", "NSArray", "NSDictionary", "NSDate", "NSRunLoop", "NSThread"] }
+# NSValue carries NSNumber (to read NSScreenNumber); NSEnumerator carries
+# NSArray::iter (to walk NSScreen.screens).
+objc2-foundation = { version = "0.2", features = ["NSString", "NSArray", "NSDictionary", "NSDate", "NSRunLoop", "NSThread", "NSValue", "NSEnumerator"] }
 
 # Configuration
 serde = { version = "1.0", features = ["derive"] }
